@@ -29,7 +29,7 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 		"META-INF/NOTICE.txt",
 	}
 
-	resource.UnitTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{

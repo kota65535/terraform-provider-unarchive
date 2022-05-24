@@ -63,7 +63,7 @@ func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	// Calculate hashes
-	sha1, _, _, err := GenerateHashes(sourceFile)
+	sha1, err := GenerateHash(sourceFile)
 	if err != nil {
 		return diag.FromErr(err)
 	}
