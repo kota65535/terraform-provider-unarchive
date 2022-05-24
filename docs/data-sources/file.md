@@ -15,7 +15,7 @@ Extract an archive and then enumerate the files.
 ```terraform
 data "unarchive_file" "zip" {
   type        = "zip"
-  source_file = "a.zip"
+  source_file = "archive.zip"
   pattern     = "**/*.txt"
   output_dir  = "${path.root}/.terraform/tmp"
 }
@@ -31,12 +31,12 @@ data "unarchive_file" "zip" {
 
 ### Optional
 
-- `output_dir` (String) Path of the directory where files are extracted.
-- `output_files` (String) Paths of the extracted files.
+- `output_dir` (String) Path of the directory where files are extracted. Defaults to `.`.
 - `pattern` (String) Glob pattern to filter files to extract.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `output_files` (List of String) Paths of the extracted files.
 
 
