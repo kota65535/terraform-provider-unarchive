@@ -3,9 +3,6 @@ package provider
 import (
 	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,19 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-const TestArchive = "commons-text-1.9.jar"
-
 func TestAccDataSourceUnarchiveFile(t *testing.T) {
-	td := createTempDir(t)
-	defer os.RemoveAll(td)
-	copyFile(TestArchive, filepath.Join(td, TestArchive))
-	cwd, _ := os.Getwd()
-	os.Chdir(td)
-	defer os.Chdir(cwd)
+	td, cwd := setup(t)
+	defer tearDown(t, td, cwd)
 
 	filenames := []string{
-		"META-INF/LICENSE.txt",
-		"META-INF/NOTICE.txt",
+		"test-dir/file-1.txt",
+		"test-dir/file-2.txt",
+		"test-dir/file-3.txt",
+		"test-file.txt",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -36,16 +29,16 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 				Config: testAccDataSourceUnarchiveFileMinimalConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccExtractedFilesExists(filenames, "."),
-					resource.TestCheckResourceAttr("data.unarchive_file.basic", "output_files.#", "140"),
+					resource.TestCheckResourceAttr("data.unarchive_file.minimal", "output_files.#", "4"),
 				),
 			},
 			{
 				Config: testAccDataSourceUnarchiveFileAllConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccExtractedFilesExists(filenames, "out"),
-					resource.TestCheckResourceAttr("data.unarchive_file.basic", "output_files.#", "2"),
-					resource.TestCheckResourceAttr("data.unarchive_file.basic", "output_files.0", filenames[0]),
-					resource.TestCheckResourceAttr("data.unarchive_file.basic", "output_files.1", filenames[1]),
+					testAccExtractedFilesExists(filenames[:2], "out"),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.#", "2"),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0", filenames[0]),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1", filenames[1]),
 				),
 			},
 		},
@@ -54,19 +47,19 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 
 func testAccDataSourceUnarchiveFileMinimalConfig() string {
 	return fmt.Sprintf(`
-	data "unarchive_file" "basic" {
+	data "unarchive_file" "minimal" {
 		type        = "zip"
-        source_file = "commons-text-1.9.jar"
+        source_file = "test-archive.zip"
 	}
 	`)
 }
 
 func testAccDataSourceUnarchiveFileAllConfig() string {
 	return fmt.Sprintf(`
-	data "unarchive_file" "basic" {
+	data "unarchive_file" "all" {
 		type        = "zip"
-        source_file = "commons-text-1.9.jar"
-		pattern     = "**/*.txt"
+        source_file = "test-archive.zip"
+		pattern     = "**/file-[1-2].txt"
         output_dir  = "out"
 	}
 	`)
@@ -84,33 +77,5 @@ func testAccExtractedFilesExists(filenames []string, dir string) resource.TestCh
 			}
 		}
 		return nil
-	}
-}
-
-func createTempDir(t *testing.T) string {
-	tmp, err := ioutil.TempDir("", "tf")
-	if err != nil {
-		t.Fatal(err)
-	}
-	return tmp
-}
-
-func copyFile(src, dst string) {
-	fin, err := os.Open(src)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer fin.Close()
-
-	fout, err := os.Create(dst)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer fout.Close()
-
-	_, err = io.Copy(fout, fin)
-
-	if err != nil {
-		log.Fatal(err)
 	}
 }

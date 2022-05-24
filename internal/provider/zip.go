@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -45,13 +46,15 @@ func UnzipSource(source, pattern, outputDir string) ([]string, error) {
 		}
 	}
 
+	sort.Strings(ret)
+
 	return ret, nil
 }
 
-func UnzipFile(f *zip.File, destination string) error {
+func UnzipFile(f *zip.File, dst string) error {
 	// 4. Check if file paths are not vulnerable to Zip Slip
-	filePath := filepath.Join(destination, f.Name)
-	if !strings.HasPrefix(filePath, filepath.Clean(destination)+string(os.PathSeparator)) {
+	filePath := filepath.Join(dst, f.Name)
+	if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
 		return fmt.Errorf("invalid file path: %s", filePath)
 	}
 
@@ -68,11 +71,11 @@ func UnzipFile(f *zip.File, destination string) error {
 	}
 
 	// 6. Create a destination file for unzipped content
-	destinationFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+	dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 	if err != nil {
 		return err
 	}
-	defer destinationFile.Close()
+	defer dstFile.Close()
 
 	// 7. Unzip the content of a file and copy it to the destination file
 	zippedFile, err := f.Open()
@@ -81,7 +84,7 @@ func UnzipFile(f *zip.File, destination string) error {
 	}
 	defer zippedFile.Close()
 
-	if _, err := io.Copy(destinationFile, zippedFile); err != nil {
+	if _, err := io.Copy(dstFile, zippedFile); err != nil {
 		return err
 	}
 	return nil
