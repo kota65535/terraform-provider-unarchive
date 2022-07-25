@@ -37,6 +37,15 @@ data "unarchive_file" "zip" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `output_files` (List of String) Paths of the extracted files.
+- `output_files` (List of Object) Extracted files. (see [below for nested schema](#nestedatt--output_files))
+
+<a id="nestedatt--output_files"></a>
+### Nested Schema for `output_files`
+
+Read-Only:
+
+- `content` (String) Raw content of the file.
+- `name` (String) Name of the file.
+- `path` (String) Path of the file.
 
 

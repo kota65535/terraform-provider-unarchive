@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"io/ioutil"
+	"path"
 )
 
 func dataSourceUnarchiveFile() *schema.Resource {
@@ -35,8 +37,26 @@ func dataSourceUnarchiveFile() *schema.Resource {
 			"output_files": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "Paths of the extracted files.",
-				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Extracted files.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Name of the file.",
+						},
+						"path": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Path of the file.",
+						},
+						"content": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Raw content of the file.",
+						},
+					},
+				},
 			},
 		},
 	}
@@ -53,14 +73,24 @@ func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m 
 		diag.Errorf("type not supported")
 	}
 
-	extracted, err := UnzipSource(sourceFile, pattern, outputDir)
+	fileNames, err := UnzipSource(sourceFile, pattern, outputDir)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("output_files", extracted)
-	if err != nil {
-		return diag.FromErr(err)
+	outputFiles := []map[string]string{}
+	for _, f := range fileNames {
+		p := path.Join(outputDir, f)
+		b, err := ioutil.ReadFile(p)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		outputFiles = append(outputFiles, map[string]string{
+			"name":    f,
+			"path":    p,
+			"content": string(b),
+		})
 	}
+	err = d.Set("output_files", outputFiles)
 
 	// Calculate hashes
 	sha1, err := GenerateHash(sourceFile)

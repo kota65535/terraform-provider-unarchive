@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -21,6 +22,12 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 		"test-dir/file-3.txt",
 		"test-file.txt",
 	}
+	contents := []string{
+		"file 1",
+		"file 2",
+		"file 3",
+		"This is test content",
+	}
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: providerFactories,
@@ -37,8 +44,12 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccExtractedFilesExists(filenames[:2], "out"),
 					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.#", "2"),
-					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0", filenames[0]),
-					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1", filenames[1]),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0.name", filenames[0]),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.name", filenames[1]),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0.path", path.Join("out", filenames[0])),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.path", path.Join("out", filenames[1])),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0.content", contents[0]),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.content", contents[1]),
 				),
 			},
 		},
