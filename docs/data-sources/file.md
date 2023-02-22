@@ -44,7 +44,6 @@ data "unarchive_file" "zip" {
 
 Read-Only:
 
-- `content` (String) Raw content of the file.
 - `name` (String) Name of the file.
 - `path` (String) Path of the file.
 

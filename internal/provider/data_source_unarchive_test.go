@@ -22,12 +22,6 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 		"test-dir/file-3.txt",
 		"test-file.txt",
 	}
-	contents := []string{
-		"file 1",
-		"file 2",
-		"file 3",
-		"This is test content",
-	}
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: providerFactories,
@@ -48,8 +42,6 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.name", filenames[1]),
 					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0.path", path.Join("out", filenames[0])),
 					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.path", path.Join("out", filenames[1])),
-					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0.content", contents[0]),
-					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.content", contents[1]),
 				),
 			},
 		},
