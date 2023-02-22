@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"io/ioutil"
 	"path"
 )
 
@@ -50,11 +49,6 @@ func dataSourceUnarchiveFile() *schema.Resource {
 							Computed:    true,
 							Description: "Path of the file.",
 						},
-						"content": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Raw content of the file.",
-						},
 					},
 				},
 			},
@@ -80,14 +74,12 @@ func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m 
 	outputFiles := []map[string]string{}
 	for _, f := range fileNames {
 		p := path.Join(outputDir, f)
-		b, err := ioutil.ReadFile(p)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		outputFiles = append(outputFiles, map[string]string{
-			"name":    f,
-			"path":    p,
-			"content": string(b),
+			"name": f,
+			"path": p,
 		})
 	}
 	err = d.Set("output_files", outputFiles)
