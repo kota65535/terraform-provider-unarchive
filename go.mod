@@ -1,6 +1,6 @@
 module github.com/kota65535/terraform-provider-unarchive
 
-go 1.17
+go 1.18
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.6.0
