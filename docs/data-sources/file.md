@@ -31,8 +31,10 @@ data "unarchive_file" "zip" {
 
 ### Optional
 
+- `excludes` (List of String) Glob patterns to exclude files to extract. Defaults to `[]` (no file excluded).
 - `output_dir` (String) Path of the directory where files are extracted. Defaults to `.`.
-- `pattern` (String) Glob pattern to filter files to extract.
+- `pattern` (String, Deprecated) Glob pattern to filter files to extract. Defaults to `**`.
+- `patterns` (List of String) Glob patterns to filter files to extract. Defaults to `["**"]` (all files included).
 
 ### Read-Only
 

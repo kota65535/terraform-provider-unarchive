@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -27,7 +26,7 @@ func tearDown(t *testing.T, td, cwd string) {
 }
 
 func createTempDir(t *testing.T) string {
-	tmp, err := ioutil.TempDir("", "tf")
+	tmp, err := os.MkdirTemp("", "tf")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -34,7 +34,7 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceUnarchiveFileAllConfig(),
+				Config: testAccDataSourceUnarchiveFileWithPattern(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccExtractedFilesExists(filenames[:2], "out"),
 					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.#", "2"),
@@ -42,6 +42,17 @@ func TestAccDataSourceUnarchiveFile(t *testing.T) {
 					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.name", filenames[1]),
 					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0.path", path.Join("out", filenames[0])),
 					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.path", path.Join("out", filenames[1])),
+				),
+			},
+			{
+				Config: testAccDataSourceUnarchiveFileWithAllConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccExtractedFilesExists(filenames[:2], "out"),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.#", "2"),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0.name", filenames[1]),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.name", filenames[2]),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.0.path", path.Join("out", filenames[1])),
+					resource.TestCheckResourceAttr("data.unarchive_file.all", "output_files.1.path", path.Join("out", filenames[2])),
 				),
 			},
 		},
@@ -57,12 +68,24 @@ func testAccDataSourceUnarchiveFileMinimalConfig() string {
 	`)
 }
 
-func testAccDataSourceUnarchiveFileAllConfig() string {
+func testAccDataSourceUnarchiveFileWithPattern() string {
 	return fmt.Sprintf(`
 	data "unarchive_file" "all" {
 		type        = "zip"
         source_file = "test-archive.zip"
 		pattern     = "**/file-[1-2].txt"
+        output_dir  = "out"
+	}
+	`)
+}
+
+func testAccDataSourceUnarchiveFileWithAllConfig() string {
+	return fmt.Sprintf(`
+	data "unarchive_file" "all" {
+		type        = "zip"
+        source_file = "test-archive.zip"
+		patterns     = ["**/file-[1-2].txt", "**/file-3.txt"]
+		excludes     = ["**/file-1.txt", "test-file.txt"]
         output_dir  = "out"
 	}
 	`)

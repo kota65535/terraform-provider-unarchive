@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func UnzipSource(source, pattern, outputDir string) ([]string, error) {
+func UnzipSource(source string, patterns []string, excludes []string, outputDir string) ([]string, error) {
 	reader, err := zip.OpenReader(source)
 	if err != nil {
 		return nil, err
@@ -28,14 +28,12 @@ func UnzipSource(source, pattern, outputDir string) ([]string, error) {
 
 	ret := []string{}
 	for _, f := range reader.File {
-		if pattern != "" {
-			matches, err := doublestar.Match(pattern, f.Name)
-			if err != nil {
-				return nil, err
-			}
-			if !matches {
-				continue
-			}
+		m, err := matchesWithExclude(f.Name, patterns, excludes)
+		if err != nil {
+			return nil, err
+		}
+		if !m {
+			continue
 		}
 		if !f.FileInfo().IsDir() {
 			ret = append(ret, f.Name)
@@ -52,13 +50,13 @@ func UnzipSource(source, pattern, outputDir string) ([]string, error) {
 }
 
 func UnzipFile(f *zip.File, dst string) error {
-	// 4. Check if file paths are not vulnerable to Zip Slip
+	// Check if file paths are not vulnerable to Zip Slip
 	filePath := filepath.Join(dst, f.Name)
 	if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
 		return fmt.Errorf("invalid file path: %s", filePath)
 	}
 
-	// 5. Create directory tree
+	// Create directory tree
 	if f.FileInfo().IsDir() {
 		if err := os.MkdirAll(filePath, os.ModePerm); err != nil {
 			return err
@@ -70,14 +68,14 @@ func UnzipFile(f *zip.File, dst string) error {
 		return err
 	}
 
-	// 6. Create a destination file for unzipped content
+	// Create a destination file for unzipped content
 	dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 	if err != nil {
 		return err
 	}
 	defer dstFile.Close()
 
-	// 7. Unzip the content of a file and copy it to the destination file
+	// Unzip the content of a file and copy it to the destination file
 	zippedFile, err := f.Open()
 	if err != nil {
 		return err
@@ -88,4 +86,32 @@ func UnzipFile(f *zip.File, dst string) error {
 		return err
 	}
 	return nil
+}
+
+func matchesWithExclude(filename string, patterns []string, excludes []string) (bool, error) {
+	m, err := matches(filename, patterns)
+	if err != nil {
+		return false, err
+	}
+	if !m {
+		return false, nil
+	}
+	m, err = matches(filename, excludes)
+	if err != nil {
+		return false, err
+	}
+	return !m, nil
+}
+
+func matches(filename string, patterns []string) (bool, error) {
+	for _, pattern := range patterns {
+		matches, err := doublestar.Match(pattern, filename)
+		if err != nil {
+			return false, err
+		}
+		if matches {
+			return true, nil
+		}
+	}
+	return false, nil
 }
