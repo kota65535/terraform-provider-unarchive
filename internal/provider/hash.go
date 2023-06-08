@@ -4,17 +4,17 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 func GenerateHash(filename string) (string, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return "", fmt.Errorf("could not compute file '%s' checksum: %s", filename, err)
 	}
 	h := sha1.New()
 	h.Write(data)
-	sha1 := hex.EncodeToString(h.Sum(nil))
+	sha := hex.EncodeToString(h.Sum(nil))
 
-	return sha1, nil
+	return sha, nil
 }
