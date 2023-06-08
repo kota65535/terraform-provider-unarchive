@@ -33,13 +33,13 @@ func dataSourceUnarchiveFile() *schema.Resource {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
-				Description: "Glob patterns to filter files to extract.",
+				Description: "Glob patterns to filter files to extract. Defaults to `[\"**\"]` (all files included).",
 			},
 			"excludes": {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
-				Description: "Glob patterns to exclude files to extract.",
+				Description: "Glob patterns to exclude files to extract. Defaults to `[]` (no file excluded).",
 			},
 			"output_dir": {
 				Type:        schema.TypeString,
