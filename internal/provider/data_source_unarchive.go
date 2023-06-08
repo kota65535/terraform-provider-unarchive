@@ -25,7 +25,7 @@ func dataSourceUnarchiveFile() *schema.Resource {
 			"pattern": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "**/*",
+				Default:     "**",
 				Description: "Glob pattern to filter files to extract.",
 				Deprecated:  "Use patterns instead",
 			},
@@ -33,14 +33,12 @@ func dataSourceUnarchiveFile() *schema.Resource {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
-				Default:     []string{"**/*"},
 				Description: "Glob patterns to filter files to extract.",
 			},
 			"excludes": {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
-				Default:     []string{},
 				Description: "Glob patterns to exclude files to extract.",
 			},
 			"output_dir": {
@@ -72,21 +70,33 @@ func dataSourceUnarchiveFile() *schema.Resource {
 	}
 }
 
+func toStringSlice(values []interface{}) []string {
+	ret := []string{}
+	for _, v := range values {
+		ret = append(ret, v.(string))
+	}
+	return ret
+}
+
 func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	type_ := d.Get("type").(string)
 	sourceFile := d.Get("source_file").(string)
 	pattern := d.Get("pattern").(string)
-	patterns := d.Get("patterns").([]string)
-	excludes := d.Get("excludes").([]string)
+	patterns := toStringSlice(d.Get("patterns").([]interface{}))
+	excludes := toStringSlice(d.Get("excludes").([]interface{}))
 	outputDir := d.Get("output_dir").(string)
 
 	if type_ != "zip" {
 		diag.Errorf("type not supported")
 	}
 
-	if pattern != "" {
-		patterns = []string{pattern}
+	if len(patterns) == 0 {
+		if pattern != "" {
+			patterns = []string{pattern}
+		} else {
+			patterns = []string{"**"}
+		}
 	}
 
 	fileNames, err := UnzipSource(sourceFile, patterns, excludes, outputDir)

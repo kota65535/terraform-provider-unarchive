@@ -8,10 +8,10 @@ import (
 )
 
 func TestMatchesExclude(t *testing.T) {
-	m, err := matchesWithExclude("foo/bar.txt", []string{"**/*"}, []string{"*.txt"})
+	m, err := matchesWithExclude("foo/bar.txt", []string{"**"}, []string{"*.txt"})
 	assert.NoError(t, err)
 	assert.True(t, m)
-	m, err = matchesWithExclude("foo/bar.txt", []string{"**/*"}, []string{"**/bar.txt"})
+	m, err = matchesWithExclude("foo/bar.txt", []string{"**"}, []string{"**/bar.txt"})
 	assert.NoError(t, err)
 	assert.False(t, m)
 	m, err = matchesWithExclude("foo/bar.txt", []string{"*.txt"}, []string{"**/bar.txt"})
