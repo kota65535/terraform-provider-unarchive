@@ -84,8 +84,8 @@ func testAccDataSourceUnarchiveFileWithAllConfig() string {
 	data "unarchive_file" "all" {
 		type        = "zip"
         source_file = "test-archive.zip"
-		patterns     = ["**/file-[1-3].txt"]
-		excludes     = ["**/file-1.txt"]
+		patterns     = ["**/file-[1-2].txt", "**/file-3.txt"]
+		excludes     = ["**/file-1.txt", "test-file.txt"]
         output_dir  = "out"
 	}
 	`)
