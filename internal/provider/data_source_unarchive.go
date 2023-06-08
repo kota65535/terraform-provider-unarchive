@@ -25,7 +25,23 @@ func dataSourceUnarchiveFile() *schema.Resource {
 			"pattern": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "**/*",
 				Description: "Glob pattern to filter files to extract.",
+				Deprecated:  "Use patterns instead",
+			},
+			"patterns": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Default:     []string{"**/*"},
+				Description: "Glob patterns to filter files to extract.",
+			},
+			"excludes": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Default:     []string{},
+				Description: "Glob patterns to exclude files to extract.",
 			},
 			"output_dir": {
 				Type:        schema.TypeString,
@@ -61,13 +77,19 @@ func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m 
 	type_ := d.Get("type").(string)
 	sourceFile := d.Get("source_file").(string)
 	pattern := d.Get("pattern").(string)
+	patterns := d.Get("patterns").([]string)
+	excludes := d.Get("excludes").([]string)
 	outputDir := d.Get("output_dir").(string)
 
 	if type_ != "zip" {
 		diag.Errorf("type not supported")
 	}
 
-	fileNames, err := UnzipSource(sourceFile, pattern, outputDir)
+	if pattern != "" {
+		patterns = []string{pattern}
+	}
+
+	fileNames, err := UnzipSource(sourceFile, patterns, excludes, outputDir)
 	if err != nil {
 		return diag.FromErr(err)
 	}

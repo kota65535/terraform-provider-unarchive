@@ -7,11 +7,26 @@ import (
 	"testing"
 )
 
+func TestMatchesExclude(t *testing.T) {
+	m, err := matchesWithExclude("foo/bar.txt", []string{"**/*"}, []string{"*.txt"})
+	assert.NoError(t, err)
+	assert.True(t, m)
+	m, err = matchesWithExclude("foo/bar.txt", []string{"**/*"}, []string{"**/bar.txt"})
+	assert.NoError(t, err)
+	assert.False(t, m)
+	m, err = matchesWithExclude("foo/bar.txt", []string{"*.txt"}, []string{"**/bar.txt"})
+	assert.NoError(t, err)
+	assert.False(t, m)
+	m, err = matchesWithExclude("foo/bar.txt", []string{}, []string{"**/bar.txt"})
+	assert.NoError(t, err)
+	assert.False(t, m)
+}
+
 func TestUnzipMinimal(t *testing.T) {
 	td, cwd := setup(t)
 	defer tearDown(t, td, cwd)
 
-	files, err := UnzipSource(TestArchive, "", ".")
+	files, err := UnzipSource(TestArchive, []string{"**/*"}, []string{}, ".")
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
 		"test-dir/file-1.txt",
@@ -30,7 +45,7 @@ func TestUnzipAll(t *testing.T) {
 	td, cwd := setup(t)
 	defer tearDown(t, td, cwd)
 
-	files, err := UnzipSource(TestArchive, "**/file-[1-2].txt", "out")
+	files, err := UnzipSource(TestArchive, []string{"**/file-[1-2].txt"}, []string{}, "out")
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
 		"test-dir/file-1.txt",
