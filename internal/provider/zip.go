@@ -11,34 +11,6 @@ import (
 	"strings"
 )
 
-func matches(filename string, patterns []string) (bool, error) {
-	for _, pattern := range patterns {
-		matches, err := doublestar.Match(pattern, filename)
-		if err != nil {
-			return false, err
-		}
-		if matches {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func matchesWithExclude(filename string, patterns []string, excludes []string) (bool, error) {
-	m, err := matches(filename, patterns)
-	if err != nil {
-		return false, err
-	}
-	if !m {
-		return false, nil
-	}
-	m, err = matches(filename, excludes)
-	if err != nil {
-		return false, err
-	}
-	return !m, nil
-}
-
 func UnzipSource(source string, patterns []string, excludes []string, outputDir string) ([]string, error) {
 	reader, err := zip.OpenReader(source)
 	if err != nil {
@@ -114,4 +86,32 @@ func UnzipFile(f *zip.File, dst string) error {
 		return err
 	}
 	return nil
+}
+
+func matchesWithExclude(filename string, patterns []string, excludes []string) (bool, error) {
+	m, err := matches(filename, patterns)
+	if err != nil {
+		return false, err
+	}
+	if !m {
+		return false, nil
+	}
+	m, err = matches(filename, excludes)
+	if err != nil {
+		return false, err
+	}
+	return !m, nil
+}
+
+func matches(filename string, patterns []string) (bool, error) {
+	for _, pattern := range patterns {
+		matches, err := doublestar.Match(pattern, filename)
+		if err != nil {
+			return false, err
+		}
+		if matches {
+			return true, nil
+		}
+	}
+	return false, nil
 }

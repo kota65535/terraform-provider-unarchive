@@ -70,14 +70,6 @@ func dataSourceUnarchiveFile() *schema.Resource {
 	}
 }
 
-func toStringSlice(values []interface{}) []string {
-	ret := []string{}
-	for _, v := range values {
-		ret = append(ret, v.(string))
-	}
-	return ret
-}
-
 func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	type_ := d.Get("type").(string)
@@ -124,4 +116,12 @@ func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m 
 	d.SetId(sha1)
 
 	return nil
+}
+
+func toStringSlice(values []interface{}) []string {
+	ret := []string{}
+	for _, v := range values {
+		ret = append(ret, v.(string))
+	}
+	return ret
 }
