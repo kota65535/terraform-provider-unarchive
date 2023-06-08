@@ -27,7 +27,7 @@ func dataSourceUnarchiveFile() *schema.Resource {
 				Optional:    true,
 				Default:     "**",
 				Description: "Glob pattern to filter files to extract.",
-				Deprecated:  "Use patterns instead",
+				Deprecated:  "Use the `patterns` attribute instead",
 			},
 			"patterns": {
 				Type:        schema.TypeList,
