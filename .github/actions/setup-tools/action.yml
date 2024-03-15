@@ -8,7 +8,7 @@ runs:
       uses: endorama/asdf-parse-tool-versions@v1
       id: versions
     - name: Setup terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ steps.versions.outputs.tools.terraform }}
         terraform_wrapper: false
