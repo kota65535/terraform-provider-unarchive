@@ -16,7 +16,8 @@ Extract an archive and then enumerate the files.
 data "unarchive_file" "zip" {
   type        = "zip"
   source_file = "archive.zip"
-  pattern     = "**/*.txt"
+  patterns    = ["**/*.{js,ts}"]
+  excludes    = ["**/*.test.*"]
   output_dir  = "${path.root}/.terraform/tmp"
 }
 ```
@@ -33,7 +34,6 @@ data "unarchive_file" "zip" {
 
 - `excludes` (List of String) Glob patterns to exclude files to extract. Defaults to `[]` (no file excluded).
 - `output_dir` (String) Path of the directory where files are extracted. Defaults to `.`.
-- `pattern` (String, Deprecated) Glob pattern to filter files to extract. Defaults to `**`.
 - `patterns` (List of String) Glob patterns to filter files to extract. Defaults to `["**"]` (all files included).
 
 ### Read-Only
