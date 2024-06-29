@@ -22,13 +22,6 @@ func dataSourceUnarchiveFile() *schema.Resource {
 				Required:    true,
 				Description: "Path of the archive file.",
 			},
-			"pattern": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "**",
-				Description: "Glob pattern to filter files to extract.",
-				Deprecated:  "Use the `patterns` attribute instead",
-			},
 			"patterns": {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -74,7 +67,6 @@ func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m 
 
 	type_ := d.Get("type").(string)
 	sourceFile := d.Get("source_file").(string)
-	pattern := d.Get("pattern").(string)
 	patterns := toStringSlice(d.Get("patterns").([]interface{}))
 	excludes := toStringSlice(d.Get("excludes").([]interface{}))
 	outputDir := d.Get("output_dir").(string)
@@ -84,11 +76,7 @@ func dataSourceUnarchiveFileRead(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	if len(patterns) == 0 {
-		if pattern != "" {
-			patterns = []string{pattern}
-		} else {
-			patterns = []string{"**"}
-		}
+		patterns = []string{"**"}
 	}
 
 	fileNames, err := UnzipSource(sourceFile, patterns, excludes, outputDir)
