@@ -2,7 +2,7 @@ module github.com/kota65535/terraform-provider-unarchive
 
 go 1.21
 
-toolchain go1.22.4
+toolchain go1.22.6
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.6.1
