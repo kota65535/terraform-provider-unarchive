@@ -15,4 +15,4 @@ runs:
     - name: Setup node (cf. https://github.com/hashicorp/setup-terraform/issues/84)
       uses: actions/setup-node@v4
       with:
-        node-version: 16
+        node-version: 24
